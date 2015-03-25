@@ -441,6 +441,57 @@ change_state (GstPlayer * self, GstPlayerState state)
   }
 }
 
+void gst_player_set_playback_rate (GstPlayer * self, gdouble rate)
+{
+  g_return_if_fail (GST_IS_PLAYER (self));
+  GstClockTime pos;
+  GstStateChangeReturn state_ret;
+  g_mutex_lock (&self->priv->lock);
+  if (!self->priv->uri) {
+    g_mutex_unlock (&self->priv->lock);
+  }
+  g_mutex_unlock (&self->priv->lock);
+  self->priv->target_state = GST_STATE_PLAYING;
+
+  if (self->priv->current_state < GST_STATE_PAUSED)
+    change_state (self, GST_PLAYER_STATE_BUFFERING);
+  if (self->priv->current_state >= GST_STATE_PAUSED && !self->priv->is_eos) {
+    state_ret = gst_element_set_state (self->priv->playbin, GST_STATE_PLAYING);
+  }
+  if (state_ret == GST_STATE_CHANGE_NO_PREROLL) {
+    self->priv->is_live = TRUE;
+  }
+  if (state_ret == GST_STATE_CHANGE_FAILURE) {
+    return G_SOURCE_REMOVE;
+  } else if (state_ret == GST_STATE_CHANGE_NO_PREROLL) {
+    self->priv->is_live = TRUE;
+  }
+  pos = gst_player_get_position (self);
+  self->priv->rate = rate;
+
+  /* Rate (1)   NORMAL
+     Rate (>1)  FAST
+     Rate (<1)  SLOW */
+  if (rate != 0) {
+      gst_element_seek (self->priv->playbin,
+                        rate,
+                        GST_FORMAT_TIME,
+                        GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE,
+                        GST_SEEK_TYPE_SET,
+                        pos,
+                        GST_SEEK_TYPE_NONE,
+                        0);
+  } 
+  else {
+    /* For Pause */
+  }
+}
+
+gdouble gst_player_get_playback_rate (GstPlayer * player)
+{
+  return player->priv->rate;
+}
+
 typedef struct
 {
   GstPlayer *player;
