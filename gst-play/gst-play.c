@@ -368,6 +368,12 @@ keyboard_cb (const gchar * key_input, gpointer user_data)
         g_main_loop_quit (play->loop);
         break;
       }
+    case 'f':
+      gst_player_set_playback_rate (play->player, 4.0);
+      break;
+    case 's':
+      gst_player_set_playback_rate (play->player, 0.5);
+      break;
       /* fall through */
     default:
       if (strcmp (key_input, GST_PLAY_KB_ARROW_RIGHT) == 0) {
