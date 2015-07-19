@@ -106,6 +106,9 @@ void         gst_player_set_mute                      (GstPlayer    * player,
 gpointer     gst_player_get_window_handle             (GstPlayer    * player);
 void         gst_player_set_window_handle             (GstPlayer    * player,
                                                        gpointer       val);
+                                                       
+void         gst_player_set_playback_rate             (GstPlayer * player, gdouble rate);
+gdouble      gst_player_get_playback_rate             (GstPlayer * player);                                                       
 
 GstElement * gst_player_get_pipeline                  (GstPlayer    * player);
 
